@@ -1,10 +1,15 @@
+from controllers.app.app_module import AppModule
 from ascender.common.module import AscModule
 
 
 @AscModule(
-    imports=[],
-    declarations=[],
-    providers=[],
+    imports=[
+        AppModule,
+    ],
+    declarations=[
+    ],
+    providers=[
+    ],
     exports=[]
 )
 class ControllersModule:

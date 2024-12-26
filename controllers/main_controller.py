@@ -12,5 +12,5 @@ class MainController:
         ...
     
     @Get()
-    async def main_endpoint(self):
+    async def send_message(self, msg: str):
         return "main works!"

@@ -8,6 +8,7 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "^3.11"
 ascender-framework = "^1.3.0b5"
+aiokafka = "^0.12.0"
 
 
 [build-system]

@@ -18,7 +18,7 @@ appBootstrap: IBootstrap = {
             KafkaDriver(
                 driver_name="kafka_1",
                 producers={"producer_1": lambda: AIOKafkaProducer()},
-                consumers={"consumer_1": lambda: AIOKafkaConsumer("test")},
+                consumers={"consumer_1": lambda: AIOKafkaConsumer("test", "test_topic")},
                 default_producer="producer_1",
                 default_consumer="consumer_1"
             ),

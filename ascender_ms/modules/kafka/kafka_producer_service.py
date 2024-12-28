@@ -4,6 +4,7 @@ from ascender.common import Injectable
 from ascender.core.application import Application
 from ascender.contrib.services import Service
 from pydantic import BaseModel
+from aiokafka import AIOKafkaProducer
 
 from ascender_ms.exceptions.connection_not_found import ConnectionNotFound
 from ascender_ms.exceptions.driver_not_found import DriverNotFound
@@ -37,7 +38,7 @@ class KafkaProducerService(Service):
             raise DriverNotFound(
                 "Kafka driver was either not found or connected!")
 
-        self._producer = self._driver.get_producer(
+        self._producer: AIOKafkaProducer = self._driver.get_producer(
             self.controller_connection.producer) if self.controller_connection.producer else self._driver.default_producer.values()[0]
 
         if not self._producer:

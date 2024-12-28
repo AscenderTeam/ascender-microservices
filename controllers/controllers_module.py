@@ -1,8 +1,10 @@
 from ascender.common.module import AscModule
 
+from controllers.test_consume.consume_module import ConsumeModule
+
 
 @AscModule(
-    imports=[],
+    imports=[ConsumeModule],
     declarations=[],
     providers=[],
     exports=[]

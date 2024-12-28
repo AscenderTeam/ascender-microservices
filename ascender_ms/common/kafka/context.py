@@ -1,11 +1,13 @@
 from dataclasses import dataclass
+from typing import Any
 
 
 @dataclass
 class KafkaContext:
     topic: str
     partition: int
-    value: bytes
+    key: bytes
+    value: Any
     offset: int
     timestamp: int
     timestamp_type: int

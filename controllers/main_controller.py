@@ -1,6 +1,7 @@
 from ascender.core.utils.controller import Controller, Get
 
 from ascender_ms.common.kafka.consume import Consume
+from ascender_ms.common.kafka.context import KafkaContext
 from ascender_ms.modules.kafka.asc_kafka_module import AscKafkaModule
 from ascender_ms.modules.kafka.kafka_producer_service import KafkaProducerService
 from ascender_ms.modules.kafka.use_connection import UseKafkaConnection
@@ -25,7 +26,3 @@ class MainController:
     async def main_endpoint(self):
         await self.kafka_producer.send_message(topic="test", value="Test", key=b"1")
         return "main works!"
-
-    @Consume("test")
-    async def handle_test(self, ctx: KafkaContext):
-        pass

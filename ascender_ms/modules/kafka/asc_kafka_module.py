@@ -1,3 +1,4 @@
+from ascender_ms.modules.kafka.kafka_consumer_service import KafkaConsumerService
 from ascender_ms.modules.kafka.kafka_producer_service import KafkaProducerService
 from ascender.common.module import AscModule
 
@@ -8,6 +9,7 @@ from ascender.common.module import AscModule
     declarations=[
     ],
     providers=[
+        KafkaConsumerService,
         KafkaProducerService,
     ],
     exports=[]

@@ -1,4 +1,4 @@
-from typing import Mapping
+from typing import Callable, Mapping
 from aiokafka import AIOKafkaConsumer, AIOKafkaProducer
 
 
@@ -6,8 +6,8 @@ class KafkaDriver:
     def __init__(
         self,
         driver_name: str,
-        producers: Mapping[str, AIOKafkaProducer] = {},
-        consumers: Mapping[str, AIOKafkaConsumer] = {},
+        producers: Mapping[str, Callable[[], AIOKafkaProducer]] = {},
+        consumers: Mapping[str, Callable[[], AIOKafkaConsumer]] = {},
         default_producer: str | None = None,
         default_consumer: str | None = None
     ):
@@ -22,11 +22,15 @@ class KafkaDriver:
         Initializes and starts connection of all producers and consumers.
         Returns nothing but runs all connections one by one.
         """
-        for producer in self.producers.values():
-            await producer.start()
+        print("Initializing kafka")
+        for key, producer in self.producers.items():
+            self.producers[key] = producer()
+            await self.producers[key].start()
+            print(key, self.producers[key])
         
-        for consumer in self.consumers.values():
-            await consumer.start()
+        for key, consumer in self.consumers.items():
+            self.consumers[key] = consumer()
+            await self.consumers[key].start()
         
     async def disconnect(self):
         """

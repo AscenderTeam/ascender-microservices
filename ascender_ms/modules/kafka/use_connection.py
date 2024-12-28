@@ -1,7 +1,7 @@
 class UseKafkaConnection:
     def __init__(
         self,
-        driver_name: str,
+        driver_name: str | None = None,
         producer: str | None = None,
         consumer: str | None = None
     ):

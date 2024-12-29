@@ -71,7 +71,6 @@ class KafkaConsumerService(Service):
         self._consumers = {}
 
         self._application.app.add_event_handler("startup", self.on_application_bootstrap)
-    
 
 
     def on_application_bootstrap(self):
@@ -97,7 +96,6 @@ class KafkaConsumerService(Service):
         
         if not self._consumer:
             raise ConnectionNotFound("Kafka consumer was not found")
-        
 
 
     async def subscribe(self, topic: str | None, key: bytes | None, partition: int | None, handler: Callable[[KafkaContext], Coroutine[Any, Any, None]]):
@@ -135,14 +133,13 @@ class KafkaConsumerService(Service):
                     continue
                 
                 parsed_value = await self.__parse_message(message.value)
-                context = await self.create_context(message, parsed_value)
+                context = self.create_context(message, parsed_value)
                 await handler(context)
 
         consume_task = asyncio.create_task(consume())
 
         if subscription_id == (None, None, None): self._consumers["all_topics"] = consume_task
         else: self._consumers[subscription_id] = consume_task
-
 
 
     async def unsubscribe(self, topic: str | None, key: bytes | None, partition: int | None):
@@ -167,7 +164,6 @@ class KafkaConsumerService(Service):
 
         consume_task = self._consumers.pop(subscription_id)
         consume_task.cancel()
-
     
 
     async def unsubscribe_from_all(self):
@@ -180,7 +176,6 @@ class KafkaConsumerService(Service):
         
         self._consumers.clear()
         return
-    
 
 
     async def get_all_subscriptions(self):
@@ -195,8 +190,7 @@ class KafkaConsumerService(Service):
         return list(self._consumers.keys())
 
 
-
-    async def create_context(self, msg: ConsumerRecord, parsed_value: Any) -> KafkaContext:
+    def create_context(self, msg: ConsumerRecord, parsed_value: Any) -> KafkaContext:
         """
         Creates a KafkaContext object to process a message.
 
@@ -242,5 +236,5 @@ class KafkaConsumerService(Service):
             try:
                 return value.decode('utf-8')
             except (UnicodeDecodeError, AttributeError):
-                value
+                return value
 

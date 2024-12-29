@@ -17,6 +17,40 @@ from aiokafka.producer.message_accumulator import BatchBuilder
 
 @Injectable()
 class KafkaProducerService(Service):
+    """
+    Service for interacting with Kafka Producer, allowing sending messages, batches and transactions
+    to Kafka.
+
+    ```py
+    from ascender.common.module import AscModule
+    from controllers.producer import ProduceController
+    from ascender_ms.modules.kafka import AscKafkaModule
+    from ascender_ms.modules.kafka import UseKafkaConnection
+
+
+    @AscModule(
+        imports=[AscKafkaModule],
+        declarations=[ProduceController],
+        providers=[UseKafkaConnection(driver_name="kafka_1", producer="producer_1", consumer="consumer_1")],
+        exports=[]
+    )
+    class ConsumeModule:
+        ...
+    ```
+
+    Use:
+    ```py
+    from ascender_ms.modules.kafka import KafkaProducerService
+
+    @Controller(
+        standalone=False,
+        guards=[],
+    )
+    class ProduceController:
+        def __init__(self, kafka_producer: KafkaProducerService, kafka_consumer: KafkaConsumerService):
+            self.kafka_producer = kafka_producer
+    ```
+    """
     def __init__(
         self,
         application: Application,
@@ -142,10 +176,16 @@ class KafkaProducerService(Service):
     
     @property
     def transaction(self):
+        """
+        Start a transaction context, use this with in `ascyn with` context
+        """
         return self._producer.transaction()
     
     @property
     def raw_producer(self):
+        """
+        Return raw and not modified version of `AIOKafkaProducer` object
+        """
         return self._producer
 
     def __convert_data(self, value: Any | BaseModel | None = None):

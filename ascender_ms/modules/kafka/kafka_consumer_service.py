@@ -98,7 +98,7 @@ class KafkaConsumerService(Service):
             raise ConnectionNotFound("Kafka consumer was not found")
 
 
-    def subscribe(self, topic: str | None, key: bytes | None, partition: int | None, handler: Callable[[KafkaContext], Coroutine[Any, Any, None]]):
+    async def subscribe(self, topic: str | None, key: bytes | None, partition: int | None, handler: Callable[[KafkaContext], Coroutine[Any, Any, None]]):
         """
         Subscribes to a Kafka topic with optional filtering by key and partition,
         and processes the received messages using a handler function.
@@ -133,7 +133,7 @@ class KafkaConsumerService(Service):
                     continue
                 
                 parsed_value = await self.__parse_message(message.value)
-                context = self.create_context(message, parsed_value)
+                context = await self.create_context(message, parsed_value)
                 await handler(context)
 
         consume_task = asyncio.create_task(consume())
@@ -142,7 +142,7 @@ class KafkaConsumerService(Service):
         else: self._consumers[subscription_id] = consume_task
 
 
-    def unsubscribe(self, topic: str | None, key: bytes | None, partition: int | None):
+    async def unsubscribe(self, topic: str | None, key: bytes | None, partition: int | None):
         """
         Unsubscribes from a specific topic, key, and partition.
 
@@ -166,7 +166,7 @@ class KafkaConsumerService(Service):
         consume_task.cancel()
     
 
-    def unsubscribe_from_all(self):
+    async def unsubscribe_from_all(self):
         """
         Unsubscribes from all active subscriptions and clears the subscription dictionary.
         """
@@ -178,7 +178,7 @@ class KafkaConsumerService(Service):
         return
 
 
-    def get_all_subscriptions(self):
+    async def get_all_subscriptions(self):
         """
         Returns a list of all active subscriptions.
 
@@ -190,7 +190,7 @@ class KafkaConsumerService(Service):
         return list(self._consumers.keys())
 
 
-    def create_context(self, msg: ConsumerRecord, parsed_value: Any) -> KafkaContext:
+    async def create_context(self, msg: ConsumerRecord, parsed_value: Any) -> KafkaContext:
         """
         Creates a KafkaContext object to process a message.
 
@@ -217,7 +217,7 @@ class KafkaConsumerService(Service):
     
 
     
-    def __parse_message(self, value: bytes):
+    async def __parse_message(self, value: bytes):
         """
         Converts the byte value of the message to a Python type (string or JSON object).
 

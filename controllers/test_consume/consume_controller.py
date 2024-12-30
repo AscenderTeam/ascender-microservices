@@ -52,7 +52,7 @@ class ConsumeController:
         return "ready"
     
 
-    @KafkaConsumer(topic="test")
+    # @KafkaConsumer(topic="test")
     async def get_json(self, ctx: KafkaContext):
         """
         Subscribes to the "test" topic for consuming messages and uses a handler to process the messages.

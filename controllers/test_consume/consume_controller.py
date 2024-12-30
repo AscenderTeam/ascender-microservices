@@ -1,5 +1,6 @@
 from ascender.core.utils.controller import Controller, Get, Post
 
+from ascender_ms.common.kafka.consumer import KafkaConsumer
 from ascender_ms.common.kafka.context import KafkaContext
 from ascender_ms.modules.kafka.kafka_producer_service import KafkaProducerService
 from ascender_ms.modules.kafka.kafka_consumer_service import KafkaConsumerService
@@ -51,16 +52,15 @@ class ConsumeController:
         return "ready"
     
 
-    @Get("/test/get_json")
-    async def get_json(self):
+    @KafkaConsumer(topic="test")
+    async def get_json(self, ctx: KafkaContext):
         """
         Subscribes to the "test" topic for consuming messages and uses a handler to process the messages.
 
         Returns:
             None
         """
-
-        await self.kafka_consumer.subscribe(topic="test", key=None, partition=None, handler=partial(self.my_handler))
+        print(f"value: {ctx.value}   key: {ctx.key}   partition: {ctx.partition}")
     
 
     async def my_handler(self, ctx: KafkaContext):

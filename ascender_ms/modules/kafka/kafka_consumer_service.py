@@ -1,5 +1,5 @@
 from typing import Callable, Any, Coroutine
-from aiokafka import ConsumerRecord, AIOKafkaConsumer, TopicPartition
+from aiokafka import ConsumerRecord, AIOKafkaConsumer
 from ascender.common import Injectable
 from ascender.contrib.services import Service
 from ascender.core.application import Application
@@ -98,7 +98,7 @@ class KafkaConsumerService(Service):
             raise ConnectionNotFound("Kafka consumer was not found")
 
 
-    async def subscribe(self, topic: str | None, key: bytes | None, partition: int | None, handler: Callable[[KafkaContext], Coroutine[Any, Any, None]]):
+    def subscribe(self, topic: str | None, key: bytes | None, partition: int | None, handler: Callable[[KafkaContext], Coroutine[Any, Any, None]]):
         """
         Subscribes to a Kafka topic with optional filtering by key and partition,
         and processes the received messages using a handler function.
@@ -142,7 +142,7 @@ class KafkaConsumerService(Service):
         else: self._consumers[subscription_id] = consume_task
 
 
-    async def unsubscribe(self, topic: str | None, key: bytes | None, partition: int | None):
+    def unsubscribe(self, topic: str | None, key: bytes | None, partition: int | None):
         """
         Unsubscribes from a specific topic, key, and partition.
 
@@ -166,7 +166,7 @@ class KafkaConsumerService(Service):
         consume_task.cancel()
     
 
-    async def unsubscribe_from_all(self):
+    def unsubscribe_from_all(self):
         """
         Unsubscribes from all active subscriptions and clears the subscription dictionary.
         """
@@ -178,7 +178,7 @@ class KafkaConsumerService(Service):
         return
 
 
-    async def get_all_subscriptions(self):
+    def get_all_subscriptions(self):
         """
         Returns a list of all active subscriptions.
 
@@ -217,7 +217,7 @@ class KafkaConsumerService(Service):
     
 
     
-    async def __parse_message(self, value: bytes):
+    def __parse_message(self, value: bytes):
         """
         Converts the byte value of the message to a Python type (string or JSON object).
 

@@ -1,6 +1,7 @@
 from typing import Literal, Sequence
 from ascender.abstracts import AbstractModule, AbstractFactory
 
+from ascender_ms._core.registry import ConsumerRegistry
 from ascender_ms.drivers.aiokafka.driver import KafkaDriver
 
 
@@ -12,6 +13,7 @@ class ProvideConnection(AbstractModule):
     ):
         self.default_driver = default_driver
         self.connection_drivers = connection_drivers
+        self.consumer_registry = ConsumerRegistry()
     
     def get_drivers(self, name: Literal["kafka"]):
         match name:
@@ -24,6 +26,8 @@ class ProvideConnection(AbstractModule):
     async def on_application_bootstrap(self, application):
         for driver in self.connection_drivers:
             await driver.connect()
+        
+        self.consumer_registry.on_application_bootstrap()
     
     async def on_application_shutdown(self, application):
         for driver in self.connection_drivers:

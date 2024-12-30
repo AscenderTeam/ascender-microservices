@@ -43,15 +43,46 @@ class KafkaGlobalService(Service):
                     key: bytes | None, 
                     partition: int | None, 
                     handler: Callable[[KafkaContext], Coroutine[Any, Any, None]]):
+        """
+        Subscribes to a Kafka topic using the specified driver and connection.
+
+        Args:
+            driver (str | None): The name of the Kafka driver to use. If None, the default driver will be used.
+            connection (str | None): The name of the consumer connection. If None, the default consumer will be used.
+            topic (str | None): The Kafka topic to subscribe to. If None, messages from all topics will be consumed.
+            key (bytes | None): The key of the messages to filter by. If None, all keys will be accepted.
+            partition (int | None): The partition of the topic to filter by. If None, all partitions will be accepted.
+            handler (Callable[[KafkaContext], Coroutine[Any, Any, None]]):
+                An asynchronous function that will handle each consumed message. It receives a `KafkaContext` object.
+
+        Raises:
+            ConnectionNotFound: If the specified or default Kafka consumer connection cannot be found.
+            ValueError: If already subscribed to the specified topic, key, and partition.
+
+        Usage Example:
+            async def message_handler(context: KafkaContext):
+                print(f"Received message: {context.value}")
+
+            await service.subscribe(
+                driver="my_driver",
+                connection="my_connection",
+                topic="my_topic",
+                key=None,
+                partition=0,
+                handler=message_handler
+            )
+        """
         
-        if driver is None: driver = self.connections.default_driver
+        if driver is None: self._driver: KafkaDriver = self.connections.find_driver_by_name(self.connections.default_driver)
         else: self._driver: KafkaDriver = self.connections.find_driver_by_name(driver)
 
         self._consumer: AIOKafkaConsumer = self._driver.get_consumer(connection)\
-            if connection else self._driver.default_consumer.values()[0]
+            if connection else self._driver.get_consumer(list(self._driver.default_consumer.keys())[0])
         
         if not self._consumer:
             raise ConnectionNotFound("Kafka consumer was not found")
+        
+        print(self._consumer)
 
         subscription_id = (topic, key, partition)
         if subscription_id in self._consumers:
@@ -80,6 +111,21 @@ class KafkaGlobalService(Service):
 
 
     async def unsubscribe(self, topic: str | None, key: bytes | None, partition: int | None):
+        """
+        Unsubscribes from a specific topic, key, and partition.
+
+        Parameters:
+            topic: str | None
+                The topic to unsubscribe from.
+            key: bytes | None
+                The key to unsubscribe from (if None, no key filtering is applied).
+            partition: int | None
+                The partition to unsubscribe from (if None, no partition filtering is applied).
+        
+        Raises:
+            ValueError: If there is no active subscription for the specified topic.
+        """
+
         subscription_id = (topic, key, partition) if topic is not "all_topics" else topic
         if not subscription_id in self._consumers:
             raise ValueError(f"You are not subsribed to topic: {topic}")
@@ -89,6 +135,10 @@ class KafkaGlobalService(Service):
     
 
     async def unsubscribe_from_all(self):
+        """
+        Unsubscribes from all active subscriptions and clears the subscription dictionary.
+        """
+
         for subscription_id, consume_task in self._consumers.items():
             consume_task.cancel()
         

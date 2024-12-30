@@ -22,5 +22,5 @@ class ConsumeController:
     
     @Get("GLOBAL/test_topic/all")
     async def test_topic_all(self):
-        await self.kafka_consumer.subscribe(driver="kafka_1", connection="consumer_1",
+        await self.kafka_consumer.subscribe(driver=None, connection=None,
                                              topic="test_topic", key=None, partition=None, handler=partial(self.my_handler))
